@@ -18,11 +18,10 @@
         return;
       }
 
-      fileList.registerTabView(new OCA.Fixity.FixityTabView('FixityTabView', {}));
+      fileList.registerTabView(new OCA.Fixity.FixityTabView('fixityTabView', {}));
 
     }
   };
 })();
 
 OC.Plugins.register('OCA.Files.FileList', OCA.Fixity.Util);
-

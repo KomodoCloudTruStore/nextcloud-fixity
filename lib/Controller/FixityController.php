@@ -1,10 +1,10 @@
 <?php
 namespace OCA\Fixity\Controller;
 
-use OCP\IRequest;
-use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Controller;
+use OCP\IRequest;
+use OC\Files\Filesystem;
+use OCP\AppFramework\Http\JSONResponse;
 
 class FixityController extends Controller {
 	private $userId;

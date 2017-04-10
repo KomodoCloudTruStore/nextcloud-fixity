@@ -30,9 +30,9 @@
     },
 
     _renderSelectList: function($el) {
-      $el.html('<div class="get-checksum">'
+      $el.html('<div class="get-fixity">'
         + '<select id="choose-algorithm">'
-          + '<option value="">' + t('checksum', 'Choose Algorithm') + '</option>'
+          + '<option value="">' + t('fixity', 'Choose Algorithm') + '</option>'
           + '<option value="md5">MD5</option>'
           + '<option value="sha256">SHA256</option>'
         + '</select></div>'
@@ -61,11 +61,11 @@
     check: function(fileInfo, algorithmType) {
       // skip call if fileInfo is null
       if(null == fileInfo) {
-        _self.updateDisplay({
-          response: 'error',
-          msg: t('fixity', 'No fileinfo provided.')
-        });
-        return;
+         _self.updateDisplay({
+           response: 'error',
+           msg: t('fixity', 'No fileinfo provided.')
+         });
+         return;
       }
 
       var url = OC.generateUrl('/apps/fixity/check'),

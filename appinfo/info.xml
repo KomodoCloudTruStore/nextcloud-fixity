@@ -8,7 +8,6 @@
     <licence>agpl</licence>
     <author mail="ladd@austin.utexas.edu" homepage="https://github.com/KomodoCloudTruStore/owncloud-fixity">Ladd Hanson</author>
     <version>0.0.1</version>
-    <namespace>Fixity</namespace>
     <category>files</category>
     <bugs>https://github.com/KomodoCloudTruStore/owncloud-fixity/issues</bugs>
     <dependencies>
