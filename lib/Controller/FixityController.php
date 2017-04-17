@@ -1,67 +1,53 @@
 <?php
+
 namespace OCA\Fixity\Controller;
 
-use OCP\AppFramework\Controller;
 use OCP\IRequest;
-use OC\Files\Filesystem;
-use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\Controller;
+
+use OCA\Fixity\Service\FixityService;
 
 class FixityController extends Controller {
-	private $userId;
 
-	public function __construct($AppName, IRequest $request, $UserId){
-		parent::__construct($AppName, $request);
-		$this->userId = $UserId;
-	}
+    use Errors;
+
+    private $service;
+
+    public function __construct($AppName, IRequest $request, FixityService $service) {
+        parent::__construct($AppName, $request);
+
+        $this->service = $service;
+
+    }
+
+    /**
+     * @NoAdminRequired
+     */
+    public function index($id) {
+        return new DataResponse($this->service->findAll($id));
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @param int $file_id
+     */
+    public function show($file_id) {
+        return $this->handleNotFound(function () use ($file_id) {
+            return $this->service->show($file_id);
+        });
+    }
+
+    /**
+     * @NoAdminRequired
+     *
+     * @param string $title
+     * @param string $content
+     */
+    public function create($file_id, $type) {
+        return $this->service->create($file_id, $type);
+    }
 
 
-	/**
-	 * callback function to get md5 hash of a file
-	 * @NoAdminRequired
-	 * @param (string) $source - filename
-	 * @param (string) $type - hash algorithm type
-	 */
-	  public function check($source, $type) {
-  		if(!$this->checkAlgorithmType($type)) {
-  			return new JSONResponse(
-				array(
-					'response' => 'error',
-					'msg' => $this->language->t('The algorithm type "%s" is not a valid or supported algorithm type.', array($type))
-				)
-			);
-		}
-
-		if($hash = $this->getHash($source, $type)){
-			return new JSONResponse(
-				array(
-					'response' => 'success',
-					'msg' => $hash
-				)
-			);
-		} else {
-			return new JSONResponse(
-				array(
-					'response' => 'error',
-					'msg' => $this->language->t('File not found.')
-				)
-			);
-		};
-	  }
-
-	  protected function getHash($source, $type) {
-	  	if($info = Filesystem::getLocalFile($source)) {
-			return hash_file($type, $info);
-	  	}
-	  	return false;
-	  }
-
-	  protected function checkAlgorithmType($type) {
-	  	$list_algos = hash_algos();
-	  	return in_array($type, $this->getAllowedAlgorithmTypes()) && in_array($type, $list_algos);
-	  }
-
-	  protected function getAllowedAlgorithmTypes() {
-	  	return array('md5', 'sha256');
-	}
 }
-

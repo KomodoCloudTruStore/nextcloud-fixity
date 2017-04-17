@@ -3,15 +3,20 @@
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>fixity</id>
     <name>Fixity</name>
-    <summary>Check fixity of files</summary>
+    <summary>Add and validate checksums on files.</summary>
     <description><![CDATA[Add and validate checksums on files.]]></description>
     <licence>agpl</licence>
-    <author mail="ladd@austin.utexas.edu" homepage="https://github.com/KomodoCloudTruStore/owncloud-fixity">Ladd Hanson</author>
-    <version>0.0.1</version>
+    <author mail="me@maxwelllincoln.com" homepage="https://github.com/KomodoCloudTruStore/nextcloud-fixity">Maxwell Lincoln</author>
+    <version>0.0.2</version>
+    <namespace>Fixity</namespace>
     <category>files</category>
-    <bugs>https://github.com/KomodoCloudTruStore/owncloud-fixity/issues</bugs>
+    <category>tools</category>
+    <types>
+        <filesystem />
+    </types>
+    <bugs>https://github.com/KomodoCloudTruStore/nextcloud-fixity/issues</bugs>
     <dependencies>
         <owncloud min-version="9.2"/>
-        <nextcloud min-version="11" max-version="12"/>
+        <nextcloud min-version="11" max-version="11"/>
     </dependencies>
 </info>
