@@ -44,7 +44,19 @@
                 + '<option value="md5">MD5</option>'
                 + '<option value="sha256">SHA256</option>'
                 + '</select></div>'
+                + '<button id="validate-hash">Validate Hashes</button>'
             );
+
+            var _self = this;
+
+            $('#validate-hash').click(function() {
+
+               _self.validate();
+
+            });
+
+
+
         },
 
         /**
@@ -112,13 +124,15 @@
 
                     for (var i = 0; i < data.msg.length; i++) {
 
-                        var row = "<p>";
+                        var row = "<div class='hash-row' style='padding: 5px 5px 5px 0; overflow-x: scroll;'><p>";
 
-                        row += "<b>" + data.msg[i]['timestamp'] + "</b> ";
-                        row += "<i>" + data.msg[i]['type'] + "</i> ";
-                        row += data.msg[i]['hash'];
+                        row += "<b>" + data.msg[i]['type'] + "</b> ";
+                        row += "<i>" + data.msg[i]['timestamp'] + "</i>";
 
                         row += "</p>";
+
+                        row += "<p>" + data.msg[i]['hash'] + "</p>";
+
 
                         rows += row;
 
@@ -130,15 +144,48 @@
 
                 }
 
-                this._renderSelectList()
+                this._renderSelectList();
+
             }
 
             if('error' == data.response) {
                 msg = data.msg;
             }
 
+
+
             this.delegateEvents({
                 'change #choose-algorithm': '_onChangeEvent'
+            });
+
+        },
+
+        validate: function() {
+
+            var url = OC.generateUrl('/apps/fixity/hashes/' + this.getFileInfo().id + '/validate' ),
+                _self = this;
+
+            $.ajax({
+                type: 'GET',
+                url: url,
+                dataType: 'json',
+                async: true,
+                success: function(data) {
+
+                    if (data) {
+
+                        $(".hash-row").css({'color': 'green'});
+
+
+                    } else {
+
+
+                        $(".hash-row").css({'color': 'red'});
+
+                    }
+
+                }
+
             });
 
         },
@@ -151,7 +198,7 @@
             var url = OC.generateUrl('/apps/fixity/hashes');
             var _self = this;
 
-            $hash = { 'file_id': this.getFileInfo().id, 'type': $(ev.currentTarget).val() };
+            var hash = { 'file_id': this.getFileInfo().id, 'type': $(ev.currentTarget).val() };
 
             this.$el.find('.fixity-details-message').html(t('fixity', 'Creating Fixity ...'));
 
@@ -164,14 +211,13 @@
                 type: 'POST',
                 url: url,
                 dataType: 'json',
-                data: $hash,
+                data: hash,
                 async: true,
                 success: function(data) {
                     _self.show(_self.getFileInfo());
                 }
             });
         },
-
         _onReloadEvent: function(ev) {
             ev.preventDefault();
             this._renderSelectList(this.$el);

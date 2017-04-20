@@ -13,11 +13,13 @@ class FixityController extends Controller {
     use Errors;
 
     private $service;
+    private $activityManager;
 
     public function __construct($AppName, IRequest $request, FixityService $service) {
         parent::__construct($AppName, $request);
 
         $this->service = $service;
+        $this->activityManager = \OC::$server->getActivityManager();
 
     }
 
@@ -33,9 +35,9 @@ class FixityController extends Controller {
      *
      * @param int $file_id
      */
-    public function show($file_id) {
-        return $this->handleNotFound(function () use ($file_id) {
-            return $this->service->show($file_id);
+    public function show($id) {
+        return $this->handleNotFound(function () use ($id) {
+            return $this->service->show($id);
         });
     }
 
@@ -46,7 +48,15 @@ class FixityController extends Controller {
      * @param string $content
      */
     public function create($file_id, $type) {
+
         return $this->service->create($file_id, $type);
+    }
+
+    public function validate($id) {
+
+        $valid = $this->service->validate($id);
+
+        return $valid;
     }
 
 

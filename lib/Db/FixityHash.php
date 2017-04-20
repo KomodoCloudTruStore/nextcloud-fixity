@@ -14,6 +14,7 @@ class FixityHash extends Entity implements JsonSerializable {
 
     public function jsonSerialize() {
         return [
+            'id' => $this->id,
             'type' => $this->type,
             'hash' => $this->hash,
             'timestamp' => $this->timestamp

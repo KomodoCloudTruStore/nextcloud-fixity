@@ -9,19 +9,16 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 
 use OCA\Fixity\Db\FixityHash;
 use OCA\Fixity\Db\FixityHashMapper;
-use OCA\Fixity\Db\FixityHashDAO;
 
 
 class FixityService {
 
     private $mapper;
     private $storage;
-    private $db;
 
-    public function __construct(FixityHashMapper $mapper, FixityStorage $storage, FixityHashDAO $db){
+    public function __construct(FixityHashMapper $mapper, FixityStorage $storage){
         $this->mapper = $mapper;
-        $this->storage = $storage;
-        $this->db = $db;
+        $this->storage = $storage;;
     }
 
     private function handleException ($e) {
@@ -31,6 +28,24 @@ class FixityService {
         } else {
             throw $e;
         }
+    }
+
+    public function validate($id) {
+
+        $valid = true;
+
+        foreach ($this->show($id) as $hash) {
+
+            if ($hash->getHash() != $this->storage->getHash($hash->getFileId(), $hash->getType())) {
+
+                $valid = false;
+
+            }
+
+        }
+
+        return $valid;
+
     }
 
     public function show($id) {
