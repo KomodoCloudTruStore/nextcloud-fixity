@@ -68,9 +68,7 @@
          */
         canDisplay: function(fileInfo) {
             if(fileInfo != null) {
-                if(!fileInfo.isDirectory()) {
-                    return true;
-                }
+                return true;
             }
             return false;
         },
