@@ -1,27 +1,27 @@
 (function() {
 
-  OCA.Fixity = OCA.Fixity || {};
-
-  /**
-   * @namespace
-   */
-  OCA.Fixity.Util = {
+    OCA.Fixity = OCA.Fixity || {};
 
     /**
-     * Initialize the Fixity plugin.
-     *
-     * @param {OCA.Files.FileList} fileList file list to be extended
+     * @namespace
      */
-    attach: function(fileList) {
+    OCA.Fixity.Util = {
 
-      if (fileList.id === 'trashbin' || fileList.id === 'files.public') {
-        return;
-      }
+        /**
+         * Initialize the Fixity plugin.
+         *
+         * @param {OCA.Files.FileList} fileList file list to be extended
+         */
+        attach: function(fileList) {
 
-      fileList.registerTabView(new OCA.Fixity.FixityTabView('fixityTabView', {}));
+            if (fileList.id === 'trashbin' || fileList.id === 'files.public') {
+                return;
+            }
 
-    }
-  };
+            fileList.registerTabView(new OCA.Fixity.FixityTabView('fixityTabView', {}));
+
+        }
+    };
 })();
 
 OC.Plugins.register('OCA.Files.FileList', OCA.Fixity.Util);
