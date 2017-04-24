@@ -6,6 +6,9 @@ use Exception;
 use OCA\Fixity\Storage\FixityStorage;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\Activity\IManager;
+use OCP\IUserSession;
+use OCP\IUser;
 
 use OCA\Fixity\Db\FixityHash;
 use OCA\Fixity\Db\FixityHashMapper;
@@ -15,10 +18,15 @@ class FixityService {
 
     private $mapper;
     private $storage;
+    private $activityManager;
+    protected $session;
 
-    public function __construct(FixityHashMapper $mapper, FixityStorage $storage){
+    public function __construct(IManager $activity, IUserSession $session, FixityHashMapper $mapper, FixityStorage $storage){
         $this->mapper = $mapper;
-        $this->storage = $storage;;
+        $this->storage = $storage;
+        $this->activityManager = $activity;
+        $this->session = $session;
+
     }
 
     private function handleException ($e) {
@@ -48,6 +56,30 @@ class FixityService {
 
     }
 
+    public function createEvent($hashId)
+    {
+
+        $actor = $this->session->getUser();
+        if ($actor instanceof IUser) {
+            $actor = $actor->getUID();
+        } else {
+            $actor = '';
+        }
+
+        $event = $this->activityManager->generateEvent();
+
+        $event->setApp('fixity');
+        $event->setType('fixity_hashes');
+        $event->setAffectedUser($actor);
+        $event->setAuthor($actor);
+        $event->setTimestamp(time());
+        $event->setSubject('Created new Fixity Hash');
+        $event->setObject('fixity',$hashId);
+
+        $this->activityManager->publish($event);
+
+    }
+
     public function show($id) {
 
         try {
@@ -67,7 +99,11 @@ class FixityService {
         $hash->setHash($this->storage->getHash($id, $type));
         $hash->setTimestamp(date("Y-m-d H:i:s"));
 
-        return $this->mapper->insert($hash);
+        $createdHash = $this->mapper->insert($hash);
+
+        $this->createEvent($createdHash->getId());
+
+        return $createdHash;
     }
 
 }

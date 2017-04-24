@@ -15,6 +15,18 @@
         <filesystem />
     </types>
     <bugs>https://github.com/KomodoCloudTruStore/nextcloud-fixity/issues</bugs>
+    <activity>
+        <providers>
+            <provider>OCA\Fixity\Activity\Provider</provider>
+        </providers>
+        <settings>
+            <setting>OCA\Fixity\Activity\Setting</setting>
+        </settings>
+        <filters>
+            <filter>OCA\Fixity\Activity\Filter</filter>
+        </filters>
+    </activity>
+
     <dependencies>
         <owncloud min-version="9.2"/>
         <nextcloud min-version="11" max-version="11"/>
