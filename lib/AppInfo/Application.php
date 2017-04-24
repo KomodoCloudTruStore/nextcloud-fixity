@@ -36,9 +36,10 @@ class Application extends App {
          */
         $container->registerService('FixityService', function($c){
             return new FixityService(
+                $c->query('ServerContainer')->getActivityManager(),
+                $c->query('ServerContainer')->getUserSession(),
                 $c->query('FixityHashMapper'),
-                $c->query('FixityStorage'),
-                $c->query('FixityHashDAO')
+                $c->query('FixityStorage')
             );
         });
 
