@@ -2,12 +2,12 @@
 
 namespace OCA\Fixity\Db;
 
-use OCP\IDb;
+use OCP\IDBConnection;
 use OCP\AppFramework\Db\Mapper;
 
 class FixityHashMapper extends Mapper {
 
-    public function __construct(IDb $db) {
+    public function __construct(IDBConnection $db) {
         parent::__construct($db, 'fixity_hashes', '\OCA\Fixity\Db\FixityHash');
     }
 

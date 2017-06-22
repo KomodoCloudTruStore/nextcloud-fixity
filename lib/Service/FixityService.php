@@ -7,8 +7,6 @@ use OCA\Fixity\Storage\FixityStorage;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\Activity\IManager;
-use OCP\IUserSession;
-use OCP\IUser;
 
 use OCA\Fixity\Db\FixityHash;
 use OCA\Fixity\Db\FixityHashMapper;
@@ -18,27 +16,26 @@ class FixityService {
 
     private $mapper;
     private $storage;
+	private $server;
     private $activityManager;
-    protected $session;
 
-    public function __construct(IManager $activity, IUserSession $session, FixityHashMapper $mapper, FixityStorage $storage){
+    public function __construct(IManager $activity, FixityHashMapper $mapper, FixityStorage  $storage) {
         $this->mapper = $mapper;
         $this->storage = $storage;
         $this->activityManager = $activity;
-        $this->session = $session;
 
     }
 
     private function handleException ($e) {
         if ($e instanceof DoesNotExistException ||
             $e instanceof MultipleObjectsReturnedException) {
-            throw new FixityNotFoundException($e->getMessage());
+            throw new FixityServiceNotFoundException($e->getMessage());
         } else {
             throw $e;
         }
     }
 
-    public function validate($id) {
+    public function validate($id, $userId) {
 
         $valid = true;
 
@@ -52,29 +49,26 @@ class FixityService {
 
         }
 
+		$this->createEvent($userId, 'validate_fixity_subject', $id);
+
         return $valid;
 
     }
 
-    public function createEvent($hashId)
+    public function createEvent($userId, $subject, $fileId)
     {
 
-        $actor = $this->session->getUser();
-        if ($actor instanceof IUser) {
-            $actor = $actor->getUID();
-        } else {
-            $actor = '';
-        }
+		$path = $this->storage->getNode($fileId)->getInternalPath();
 
-        $event = $this->activityManager->generateEvent();
+    	$event = $this->activityManager->generateEvent();
 
         $event->setApp('fixity');
-        $event->setType('fixity_hashes');
-        $event->setAffectedUser($actor);
-        $event->setAuthor($actor);
+        $event->setType('fixity');
+        $event->setAffectedUser($userId);
+        $event->setAuthor($userId);
         $event->setTimestamp(time());
-        $event->setSubject('Created new Fixity Hash');
-        $event->setObject('fixity',$hashId);
+		$event->setSubject($subject, [$userId, $path]);
+		$event->setObject('files', (int)$fileId);
 
         $this->activityManager->publish($event);
 
@@ -90,7 +84,7 @@ class FixityService {
 
     }
 
-    public function create($id, $type) {
+    public function create($id, $type, $userId) {
 
         $hash = new FixityHash();
 
@@ -101,7 +95,7 @@ class FixityService {
 
         $createdHash = $this->mapper->insert($hash);
 
-        $this->createEvent($createdHash->getId());
+        $this->createEvent($userId, 'create_fixity_subject', $id);
 
         return $createdHash;
     }

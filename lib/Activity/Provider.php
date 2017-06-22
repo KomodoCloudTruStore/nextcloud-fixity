@@ -46,20 +46,42 @@ class Provider implements IProvider {
     protected $eventMerger;
     /** @var string[] cached displayNames - key is the UID and value the displayname */
     protected $displayNames = [];
-    /**
-     * @param IFactory $languageFactory
-     * @param IURLGenerator $url
-     * @param IManager $activityManager
-     * @param IUserManager $userManager
-     * @param IEventMerger $eventMerger
-     */
-    public function __construct(IFactory $languageFactory, IURLGenerator $url, IManager $activityManager, IUserManager $userManager, IEventMerger $eventMerger) {
-        $this->languageFactory = $languageFactory;
-        $this->url = $url;
-        $this->activityManager = $activityManager;
-        $this->userManager = $userManager;
-        $this->eventMerger = $eventMerger;
-    }
+	/**
+	 * @param IFactory $languageFactory
+	 * @param IURLGenerator $url
+	 * @param IManager $activityManager
+	 * @param IUserManager $userManager
+	 * @param IEventMerger $eventMerger
+	 */
+	public function __construct(IL10N $l, IFactory $languageFactory, IURLGenerator $url, IManager $activityManager,
+								IUserManager $userManager, IEventMerger $eventMerger)
+	{
+
+		$this->l = $l;
+		$this->languageFactory = $languageFactory;
+		$this->url = $url;
+		$this->activityManager = $activityManager;
+		$this->userManager = $userManager;
+		$this->eventMerger = $eventMerger;
+	}
+
+	protected function generateFileParameter($id, $path) {
+		return [
+			'type' => 'file',
+			'id' => $id,
+			'name' => basename($path),
+			'path' => $path,
+			'link' => $this->url->linkToRouteAbsolute('files.viewcontroller.showFile', ['fileid' => $id]),
+		];
+	}
+	protected function generateUserParameter($uid) {
+		return [
+			'type' => 'user',
+			'id' => $uid,
+			'name' => $uid,// FIXME Use display name
+		];
+	}
+
     /**
      * @param string $language
      * @param IEvent $event
@@ -69,7 +91,7 @@ class Provider implements IProvider {
      * @since 11.0.0
      */
     public function parse($language, IEvent $event, IEvent $previousEvent = null) {
-        if ($event->getApp() !== 'fixity_hashes') {
+        if ($event->getApp() !== 'fixity') {
             throw new \InvalidArgumentException();
         }
 
@@ -92,10 +114,51 @@ class Provider implements IProvider {
      */
     public function parseShortVersion(IEvent $event) {
 
-        $subject = $this->l->t('Hash Created for {file}');
-        $event->setIcon($this->url->getAbsoluteURL($this->url->imagePath('files', 'add-color.svg')));
+		$subjectParameters = $event->getSubjectParameters();
 
-        return $event;
+		if ($event->getSubject() === 'create_fixity_subject') {
+
+			$activityVerb = 'created a hash.';
+			$event->setIcon($this->url->getAbsoluteURL($this->url->imagePath('files', 'add-color.svg')));
+
+		} elseif ($event->getSubject() === 'update_fixity_subject') {
+
+			$activityVerb = 'updated this hash.';
+			$event->setIcon($this->url->getAbsoluteURL($this->url->imagePath('files', 'add-color.svg')));
+
+		} elseif ($event->getSubject() === 'validate_fixity_subject') {
+
+			$activityVerb = 'validated this hash.';
+			$event->setIcon($this->url->getAbsoluteURL($this->url->imagePath('files', 'add-color.svg')));
+
+		} elseif ($event->getSubject() === 'delete_fixity_subject') {
+
+			$activityVerb = 'deleted this hash.';
+			$event->setIcon($this->url->getAbsoluteURL($this->url->imagePath('files', 'add-color.svg')));
+
+		} else {
+
+			throw new \InvalidArgumentException();
+
+		}
+
+		if ($subjectParameters[0] === $this->activityManager->getCurrentUserId()) {
+
+			$event->setParsedSubject($this->l->t('You ' . $activityVerb))
+				->setRichSubject($this->l->t('You '  . $activityVerb), []);
+
+		} else {
+
+			$author = $this->generateUserParameter($subjectParameters[0]);
+			$event->setParsedSubject($this->l->t('%1$s '  . $activityVerb, [$author['name']]))
+				->setRichSubject($this->l->t('{author} ' . $activityVerb), [
+					'author' => $author,
+				]);
+
+		}
+
+		return $event;
+
     }
 
     /**
@@ -107,27 +170,64 @@ class Provider implements IProvider {
      */
     public function parseLongVersion(IEvent $event, IEvent $previousEvent = null) {
 
-        $subject = $this->l->t('Hash Created for {file}');
-        $event->setIcon($this->url->getAbsoluteURL($this->url->imagePath('files', 'add-color.svg')));
+		$subjectParameters = $event->getSubjectParameters();
 
-        $event = $this->eventMerger->mergeEvents('file', $event, $previousEvent);
+		$activityVerb = '';
 
-        return $event;
-    }
+		if ($event->getSubject() === 'create_fixity_subject') {
 
-    /**
-     * @param int $id
-     * @param string $path
-     * @return array
-     */
-    protected function generateFileParameter($id, $path) {
-        return [
-            'type' => 'file',
-            'id' => $id,
-            'name' => basename($path),
-            'path' => $path,
-            'link' => $this->url->linkToRouteAbsolute('files.viewcontroller.showFile', ['fileid' => $id]),
-        ];
+			$activityVerb = 'created a hash for';
+			$event->setIcon($this->url->getAbsoluteURL($this->url->imagePath('files', 'add-color.svg')));
+
+		} elseif ($event->getSubject() === 'validate_fixity_subject') {
+
+			$activityVerb = 'validated the hash for';
+			$event->setIcon($this->url->getAbsoluteURL($this->url->imagePath('files', 'add-color.svg')));
+
+		} elseif ($event->getSubject() === 'update_fixity_subject') {
+
+			$activityVerb = 'updated the hash for';
+			$event->setIcon($this->url->getAbsoluteURL($this->url->imagePath('files', 'add-color.svg')));
+
+		} elseif ($event->getSubject() === 'delete_fixity_subject') {
+
+			$activityVerb = 'deleted the hash for';
+			$event->setIcon($this->url->getAbsoluteURL($this->url->imagePath('files', 'add-color.svg')));
+
+		} else {
+
+			throw new \InvalidArgumentException();
+
+		}
+
+		if ($subjectParameters[0] === $this->activityManager->getCurrentUserId()) {
+
+			$message = 'You ' . $activityVerb . ' %1$s';
+			$messageRich = 'You ' . $activityVerb . ' {file}';
+
+			$event->setParsedSubject($this->l->t($message, [
+
+				trim($subjectParameters[1], '/'),
+
+			]))
+				->setRichSubject($this->l->t($messageRich), [
+					'file' => $this->generateFileParameter($event->getObjectId(), $subjectParameters[1]),
+				]);
+
+		} else {
+			$author = $this->generateUserParameter($subjectParameters[0]);
+
+			$event->setParsedSubject($this->l->t('%1$s ' . $activityVerb . ' %2$s', [
+				$author['name'],
+				trim($subjectParameters[1], '/'),
+			]))
+				->setRichSubject($this->l->t('{author} ' . $activityVerb . ' {file}'), [
+					'author' => $author,
+					'file' => $this->generateFileParameter($event->getObjectId(), $subjectParameters[1]),
+				]);
+		}
+
+		return $event;
     }
 
 }

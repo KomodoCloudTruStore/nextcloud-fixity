@@ -7,19 +7,20 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Controller;
 
 use OCA\Fixity\Service\FixityService;
+use OCP\IUserSession;
 
 class FixityController extends Controller {
 
     use Errors;
 
     private $service;
-    private $activityManager;
+    private $userId;
 
-    public function __construct($AppName, IRequest $request, FixityService $service) {
+    public function __construct($AppName, IRequest $request, FixityService $service, IUserSession $session) {
         parent::__construct($AppName, $request);
 
         $this->service = $service;
-        $this->activityManager = \OC::$server->getActivityManager();
+		$this->userId = $session->getUser()->getUID();
 
     }
 
@@ -49,12 +50,12 @@ class FixityController extends Controller {
      */
     public function create($file_id, $type) {
 
-        return $this->service->create($file_id, $type);
+        return $this->service->create($file_id, $type, $this->userId);
     }
 
     public function validate($id) {
 
-        $valid = $this->service->validate($id);
+        $valid = $this->service->validate($id, $this->userId);
 
         return $valid;
     }

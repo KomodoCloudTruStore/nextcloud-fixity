@@ -27,7 +27,8 @@ class Application extends App {
             return new FixityController(
                 $c->query('AppName'),
                 $c->query('Request'),
-                $c->query('FixityService')
+                $c->query('FixityService'),
+				$c->query('ServerContainer')->getUserSession()
             );
         });
 
@@ -37,7 +38,6 @@ class Application extends App {
         $container->registerService('FixityService', function($c){
             return new FixityService(
                 $c->query('ServerContainer')->getActivityManager(),
-                $c->query('ServerContainer')->getUserSession(),
                 $c->query('FixityHashMapper'),
                 $c->query('FixityStorage')
             );
@@ -48,13 +48,13 @@ class Application extends App {
          */
         $container->registerService('FixityHashMapper', function($c){
             return new FixityHashMapper(
-                $c->query('ServerContainer')->getDb()
+                $c->query('ServerContainer')->getDatabaseConnection()
             );
         });
 
         $container->registerService('FixityHashDAO', function($c){
             return new FixityHashDAO(
-                $c->query('ServerContainer')->getDb()
+                $c->query('ServerContainer')->getDatabaseConnection()
             );
         });
 
