@@ -19,14 +19,14 @@ class Setting implements ISetting {
      * @since 11.0.0
      */
     public function getIdentifier() {
-        return 'fixity_hashes';
+        return 'fixity';
     }
     /**
      * @return string A translated string
      * @since 11.0.0
      */
     public function getName() {
-        return $this->l->t('<strong>Fixity Hashes</strong>');
+        return $this->l->t('<strong>Fixity Hashes</strong> for files');
     }
     /**
      * @return int whether the filter should be rather on the top or bottom of

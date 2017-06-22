@@ -36,14 +36,14 @@ class Filter implements IFilter {
      * @since 11.0.0
      */
     public function getIdentifier() {
-        return 'fixity_hashes';
+        return 'fixity';
     }
     /**
      * @return string A translated string
      * @since 11.0.0
      */
     public function getName() {
-        return $this->l->t('Fixity Hashes');
+        return $this->l->t('Fixity');
     }
     /**
      * @return int
@@ -72,6 +72,6 @@ class Filter implements IFilter {
      * @since 11.0.0
      */
     public function allowedApps() {
-        return ['fixity', 'files'];
+        return ['fixity'];
     }
 }
