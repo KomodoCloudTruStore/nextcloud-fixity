@@ -55,51 +55,55 @@
 				sha.css('display', 'none');
 				spinner.css('display', 'inline');
 
-				jQuery('tr.selected').each(function() {
+				setInterval(function () {
 
-					var hash = {
+					jQuery('tr.selected').each(function() {
 
-					    'file_id': parseInt(jQuery(this).attr('data-id')),
-                        'type': 'md5'
+						var hash = {
 
-					};
+						    'file_id': parseInt(jQuery(this).attr('data-id')),
+	                        'type': 'md5'
 
-					$.ajax({
-						type: 'POST',
-						url: url,
-						dataType: 'json',
-						data: hash,
-						async: true,
-						tryCount : 0,
-    					retryLimit : 3,
-						success: function(data) {},
-						error: function(xhr, textStatus, errorThrown) {
+						};
 
-							if (textStatus == 'timeout') {
+						$.ajax({
+							type: 'POST',
+							url: url,
+							dataType: 'json',
+							data: hash,
+							async: true,
+							tryCount : 0,
+	    					retryLimit : 3,
+							success: function(data) {},
+							error: function(xhr, textStatus, errorThrown) {
 
-								this.tryCount++;
+								if (textStatus == 'timeout') {
 
-								if (this.tryCount <= this.retryLimit) {
+									this.tryCount++;
 
-									$.ajax(this);
+									if (this.tryCount <= this.retryLimit) {
+
+										$.ajax(this);
+										return;
+
+									}
 									return;
 
 								}
-								return;
+
+								if (xhr.status == 500) {
+
+									return;
+
+								}
 
 							}
+						});
 
-							if (xhr.status == 500) {
 
-								return;
-
-							}
-
-						}
 					});
 
-
-				});
+				}, 1000)
 
 				setInterval(function () {
 
@@ -119,7 +123,9 @@
 				sha.css('display', 'none');
 				spinner.css('display', 'inline');
 
-				jQuery('tr.selected').each(function() {
+				setInterval(function () {
+
+					jQuery('tr.selected').each(function() {
 
 					var hash = {
 
@@ -162,7 +168,9 @@
 						}
 					});
 
-				});
+					});
+
+				}, 1000)
 
 				setInterval(function () {
 
@@ -172,7 +180,11 @@
 
 			});
 
-            jQuery('#selectedActionsList').append(container);
+            jQuery('document').ready(function() {
+
+            	jQuery('#selectedActionsList').append(container);
+
+            });
 
             fileList.registerTabView(new OCA.Fixity.FixityTabView('fixityTabView', {}));
 
