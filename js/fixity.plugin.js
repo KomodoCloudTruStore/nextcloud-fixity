@@ -91,7 +91,7 @@
 
 							if (xhr.status == 500) {
 
-								break;
+								return;
 
 							}
 
@@ -155,16 +155,12 @@
 
 							if (xhr.status == 500) {
 
-								break;
+								return;
 
 							}
 
 						}
 					});
-
-
-				});
-
 
 				});
 
