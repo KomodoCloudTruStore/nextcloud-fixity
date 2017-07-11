@@ -70,7 +70,32 @@
 						dataType: 'json',
 						data: hash,
 						async: true,
-						success: function(data) {}
+						tryCount : 0,
+    					retryLimit : 3,
+						success: function(data) {},
+						error: function(xhr, textStatus, errorThrown) {
+
+							if (textStatus == 'timeout') {
+
+								this.tryCount++;
+
+								if (this.tryCount <= this.retryLimit) {
+
+									$.ajax(this);
+									return;
+
+								}
+								return;
+
+							}
+
+							if (xhr.status == 500) {
+
+								break;
+
+							}
+
+						}
 					});
 
 
@@ -109,8 +134,36 @@
 						dataType: 'json',
 						data: hash,
 						async: true,
-						success: function(data) {}
+						tryCount : 0,
+    					retryLimit : 3,
+						success: function(data) {},
+						error: function(xhr, textStatus, errorThrown) {
+
+							if (textStatus == 'timeout') {
+
+								this.tryCount++;
+
+								if (this.tryCount <= this.retryLimit) {
+
+									$.ajax(this);
+									return;
+
+								}
+								return;
+
+							}
+
+							if (xhr.status == 500) {
+
+								break;
+
+							}
+
+						}
 					});
+
+
+				});
 
 
 				});
